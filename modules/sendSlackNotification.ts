@@ -1,4 +1,16 @@
-import { ZuploContext, ZuploRequest } from "@zuplo/runtime";
+import { ZuploContext, ZuploRequest, environment } from "@zuplo/runtime";
+
+/**
+ * Converts common standard Markdown to Slack mrkdwn so formatting displays correctly.
+ * Slack already parses *bold*, _italic_, ~~strikethrough~~, `code`,locks```.
+ * Links need conversion: [text](url) → <url|text>.
+ */
+function markdownToSlackMrkdwn(text: string): string {
+  return text.replace(
+    /\[([^\]]*)\]\((https?:\/\/[^)]+)\)/g,
+    (_, label, url) => `<${url}|${label}>`
+  );
+}
 
 export default async function (
   request: ZuploRequest,
@@ -34,7 +46,7 @@ export default async function (
   }
 
   // 3️⃣ Read secret from env
-     const token = process.env.SLACK_BOT_TOKEN;
+  const token = environment.SLACK_BOT_TOKEN;
 
   if (!token) {
     return new Response(
@@ -43,7 +55,7 @@ export default async function (
     );
   }
 
-  // 4️⃣ Call Slack Web API via fetch
+  // 4️⃣ Call Slack Web API via fetch (message supports markdown → mrkdwn)
   let slackResponse;
   try {
     slackResponse = await fetch("https://slack.com/api/chat.postMessage", {
@@ -54,7 +66,7 @@ export default async function (
       },
       body: JSON.stringify({
         channel: `#${channelName}`,
-        text: message
+        text: markdownToSlackMrkdwn(message)
       })
     });
   } catch (err: any) {
