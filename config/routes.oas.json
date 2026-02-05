@@ -1,0 +1,27 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Slack Notifications API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/notification/slack/{channel_name}": {
+      "x-zuplo-path": {
+        "pathMode": "open-api"
+      },
+      "post": {
+        "summary": "Send Slack notification",
+        "x-zuplo-route": {
+          "handler": {
+            "module": "$import(./modules/sendSlackNotification)",
+            "export": "default"
+          },
+          "policies": {
+            "inbound": []
+          }
+        },
+        "operationId": "faac9ba5-ff76-4b88-8ab5-8de07c9bd2b1"
+      }
+    }
+  }
+}
